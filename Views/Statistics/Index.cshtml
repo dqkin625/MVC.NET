@@ -1,0 +1,92 @@
+@model QuanLyBaiBaoKhoaHoc.Controllers.StatisticsViewModel
+
+@{
+    ViewData["Title"] = "Thống kê bài viết";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Thống kê bài viết</h2>
+
+    <ul class="nav nav-tabs mb-3" id="statsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="author-tab" data-bs-toggle="tab" data-bs-target="#author" type="button" role="tab">Theo tác giả</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="topic-tab" data-bs-toggle="tab" data-bs-target="#topic" type="button" role="tab">Theo chủ đề</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab">Theo trạng thái</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="statsTabsContent">
+        <!-- Tác giả -->
+        <div class="tab-pane fade show active" id="author" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tác giả</th>
+                            <th class="text-end">Số lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ArticlesByAuthor)
+                        {
+                            <tr>
+                                <td>@item.AuthorName</td>
+                                <td class="text-end">@item.Count</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Chủ đề -->
+        <div class="tab-pane fade" id="topic" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Chủ đề</th>
+                            <th class="text-end">Số lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ArticlesByTopic)
+                        {
+                            <tr>
+                                <td>@item.TopicName</td>
+                                <td class="text-end">@item.Count</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Trạng thái -->
+        <div class="tab-pane fade" id="status" role="tabpanel">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Số lượng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.ArticlesByStatus)
+                        {
+                            <tr>
+                                <td>@item.Status</td>
+                                <td class="text-end">@item.Count</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

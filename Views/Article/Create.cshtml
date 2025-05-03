@@ -1,0 +1,57 @@
+@model QuanLyBaiBaoKhoaHoc.Models.ArticleCreateViewModel
+
+@{
+    ViewData["Title"] = "Thêm bài viết mới";
+}
+
+<h2 class="text-center mb-4">Thêm bài viết mới</h2>
+
+<form asp-action="Create">
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Article.Title" class="form-label"></label>
+        <input asp-for="Article.Title" class="form-control" />
+        <span asp-validation-for="Article.Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Article.Summary" class="form-label"></label>
+        <textarea asp-for="Article.Summary" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Article.Summary" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="Article.Content" class="form-label"></label>
+        <textarea asp-for="Article.Content" class="form-control" rows="10"></textarea>
+        <span asp-validation-for="Article.Content" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label class="form-label">Chủ đề</label>
+        @for (int i = 0; i < Model.Topics.Count(); i++)
+        {
+            <div class="form-check">
+                <input type="checkbox"
+                       class="form-check-input"
+                       name="SelectedTopicIds"
+                       value="@Model.Topics[i].Value"
+                       id="topic_@i" />
+                <label class="form-check-label" for="topic_@i">
+                    @Model.Topics[i].Text
+                </label>
+            </div>
+        }
+        <span asp-validation-for="SelectedTopicIds" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group mt-4">
+        <button type="submit" class="btn btn-primary w-100">Thêm</button>
+        <a asp-action="Index" class="btn btn-secondary w-100 mt-2">Quay lại</a>
+    </div>
+</form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

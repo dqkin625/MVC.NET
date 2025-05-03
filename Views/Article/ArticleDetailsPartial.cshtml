@@ -1,0 +1,11 @@
+﻿@model QuanLyBaiBaoKhoaHoc.Models.Article
+
+<div>
+    <h4>@Model.Title</h4>
+    <p><strong>Tác giả:</strong> @Model.Author?.FullName</p>
+    <p><strong>Ngày gửi:</strong> @Model.SubmittedDate.ToShortDateString()</p>
+    <p><strong>Chủ đề:</strong> @string.Join(", ", Model.ArticleTopics.Select(at => at.Topic.Name))</p>
+    <p><strong>Tóm tắt:</strong> @Model.Summary</p>
+    <p><strong>Nội dung:</strong> @Model.Content</p>
+    <p><strong>Trạng thái:</strong> @Model.Status</p>
+</div>

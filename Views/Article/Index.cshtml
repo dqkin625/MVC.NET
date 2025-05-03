@@ -1,0 +1,110 @@
+@model IEnumerable<QuanLyBaiBaoKhoaHoc.Models.Article>
+
+@{
+    ViewData["Title"] = "Danh sách bài viết";
+    var role = Context.Session.GetString("Role");
+    var currentStatus = ViewBag.CurrentStatus as string;
+}
+
+<h2>Danh sách bài viết</h2>
+
+<!-- Tabs lọc bài viết -->
+<div class="mb-3">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link @(string.IsNullOrEmpty(currentStatus) ? "active" : "")" asp-action="Index">Tất cả</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(currentStatus == "Pending" ? "active" : "")"
+               asp-action="IndexByStatus" asp-route-status="Pending">Chờ duyệt</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(currentStatus == "Approved" ? "active" : "")"
+               asp-action="IndexByStatus" asp-route-status="Approved">Đã duyệt</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(currentStatus == "Rejected" ? "active" : "")"
+               asp-action="IndexByStatus" asp-route-status="Rejected">Từ chối</a>
+        </li>
+    </ul>
+</div>
+
+@if (role != "Admin")
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Thêm bài viết mới</a>
+    </p>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tiêu đề</th>
+            <th>Tác giả</th>
+            <th>Ngày gửi</th>
+            <th>Chủ đề</th>
+            <th>Trạng thái</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    <a href="javascript:void(0);" onclick="showDetails(@item.ArticleId)">
+                        @item.Title
+                    </a>
+                </td>
+                <td>@item.Author.FullName</td>
+                <td>@item.SubmittedDate.ToShortDateString()</td>
+                <td>
+                    @string.Join(", ", item.ArticleTopics.Select(at => at.Topic.Name))
+                </td>
+                <td>@item.Status</td>
+                <td>
+                    @if (role != "Admin" && item.Status == ArticleStatus.Pending)
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.ArticleId" class="btn btn-sm btn-info">Sửa</a>
+                        <a asp-action="Delete" asp-route-id="@item.ArticleId" class="btn btn-sm btn-danger">Xóa</a>
+                    }
+
+                    @if (role == "Admin" && item.Status == ArticleStatus.Pending)
+                    {
+                        <a asp-action="Approve" asp-route-id="@item.ArticleId" class="btn btn-sm btn-success">Duyệt</a>
+                        <a asp-action="Reject" asp-route-id="@item.ArticleId" class="btn btn-sm btn-warning">Từ chối</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal Bootstrap -->
+<div class="modal fade" id="articleModal" tabindex="-1" aria-labelledby="articleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="articleModalLabel">Chi tiết bài viết</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body" id="articleModalBody">
+                <!-- Nội dung sẽ được load bằng AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function showDetails(id) {
+            fetch('/Article/Details/' + id)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById("articleModalBody").innerHTML = html;
+                    var modal = new bootstrap.Modal(document.getElementById('articleModal'));
+                    modal.show();
+                });
+        }
+    </script>
+}

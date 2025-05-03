@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Chào mừng đến với hệ thống quản lý bài báo khoa học</h1>
+    
+    @if (Context.Session.GetString("Role") == "Admin")
+    {
+        <div class="mt-4">
+            <a asp-controller="Article" asp-action="Index" class="btn btn-primary">Quản lý bài viết</a>
+            <a asp-controller="Statistics" asp-action="Index" class="btn btn-success">Xem thống kê</a>
+        </div>
+    }
+    else
+    {
+        <div class="mt-4">
+            <a asp-controller="Article" asp-action="Index" class="btn btn-primary">Quản lý bài viết của tôi</a>
+        </div>
+    }
+</div>
