@@ -11,6 +11,6 @@ namespace QuanLyBaiBaoKhoaHoc.Models
         [Display(Name = "Tên chủ đề")]
         public string Name { get; set; }
 
-        public ICollection<ArticleTopic> ArticleTopics { get; set; }
+        public ICollection<ArticleTopic> ArticleTopics { get; set; } //quan hệ nhiều nhiều với Article thông qua bảng trung gian ArticleTopic
     }
 }

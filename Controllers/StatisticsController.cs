@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using QuanLyBaiBaoKhoaHoc.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace QuanLyBaiBaoKhoaHoc.Controllers
 {
-    //[Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")] nếu dùng thì ASP.NET Core sẽ tự bảo vệ toan bộ controller này, khong cần kiểm tra lại trong action
     public class StatisticsController : Controller
     {
         private readonly AppDbContext _context;
@@ -43,30 +43,5 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
 
             return View(stats);
         }
-    }
-
-    public class StatisticsViewModel
-    {
-        public List<AuthorStats> ArticlesByAuthor { get; set; }
-        public List<TopicStats> ArticlesByTopic { get; set; }
-        public List<StatusStats> ArticlesByStatus { get; set; }
-    }
-
-    public class AuthorStats
-    {
-        public string AuthorName { get; set; }
-        public int Count { get; set; }
-    }
-
-    public class TopicStats
-    {
-        public string TopicName { get; set; }
-        public int Count { get; set; }
-    }
-
-    public class StatusStats
-    {
-        public string Status { get; set; }
-        public int Count { get; set; }
     }
 }

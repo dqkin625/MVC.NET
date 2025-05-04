@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using QuanLyBaiBaoKhoaHoc.Models;
 
 namespace QuanLyBaiBaoKhoaHoc.Controllers
@@ -14,7 +14,7 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
 
         public IActionResult Index()
         {
-            if (HttpContext.Session.GetString("UserId") == null)
+            if (HttpContext.Session.GetString("UserId") == null) //kiểm tra người dùng đã đăng nhập chưa bằng các kiểm tra Session
             {
                 return RedirectToAction("Login", "Account");
             }

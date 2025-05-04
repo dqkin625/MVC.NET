@@ -8,7 +8,7 @@
 
 <h2>Danh sách bài viết</h2>
 
-<!-- Tabs lọc bài viết -->
+<!-- Tabs lọc bài viết: CẢ ADMIN VÀ AUTHOR đều thấy -->
 <div class="mb-3">
     <ul class="nav nav-tabs">
         <li class="nav-item">
@@ -29,7 +29,8 @@
     </ul>
 </div>
 
-@if (role != "Admin")
+<!-- Nút thêm bài viết chỉ dành cho Author -->
+@if (role == "Author")
 {
     <p>
         <a asp-action="Create" class="btn btn-primary">Thêm bài viết mới</a>
@@ -58,17 +59,17 @@
                 </td>
                 <td>@item.Author.FullName</td>
                 <td>@item.SubmittedDate.ToShortDateString()</td>
-                <td>
-                    @string.Join(", ", item.ArticleTopics.Select(at => at.Topic.Name))
-                </td>
+                <td>@string.Join(", ", item.ArticleTopics.Select(at => at.Topic.Name))</td>
                 <td>@item.Status</td>
                 <td>
-                    @if (role != "Admin" && item.Status == ArticleStatus.Pending)
+                    @* Author: chỉ được sửa hoặc xóa khi bài đang chờ duyệt *@
+                    @if (role == "Author" && item.Status == ArticleStatus.Pending)
                     {
                         <a asp-action="Edit" asp-route-id="@item.ArticleId" class="btn btn-sm btn-info">Sửa</a>
                         <a asp-action="Delete" asp-route-id="@item.ArticleId" class="btn btn-sm btn-danger">Xóa</a>
                     }
 
+                    @* Admin: chỉ được duyệt hoặc từ chối khi bài đang chờ duyệt *@
                     @if (role == "Admin" && item.Status == ArticleStatus.Pending)
                     {
                         <a asp-action="Approve" asp-route-id="@item.ArticleId" class="btn btn-sm btn-success">Duyệt</a>
@@ -80,7 +81,7 @@
     </tbody>
 </table>
 
-<!-- Modal Bootstrap -->
+<!-- Modal hiển thị chi tiết bài viết -->
 <div class="modal fade" id="articleModal" tabindex="-1" aria-labelledby="articleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

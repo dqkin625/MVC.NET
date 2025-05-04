@@ -230,3 +230,4 @@ D:\DUT 2\HK2\.NET Workspace\QuanLyBaiBaoKhoaHoc\obj\Debug\net9.0\refint\QuanLyBa
 D:\DUT 2\HK2\.NET Workspace\QuanLyBaiBaoKhoaHoc\obj\Debug\net9.0\QuanLyBaiBaoKhoaHoc.pdb
 D:\DUT 2\HK2\.NET Workspace\QuanLyBaiBaoKhoaHoc\obj\Debug\net9.0\QuanLyBaiBaoKhoaHoc.genruntimeconfig.cache
 D:\DUT 2\HK2\.NET Workspace\QuanLyBaiBaoKhoaHoc\obj\Debug\net9.0\ref\QuanLyBaiBaoKhoaHoc.dll
+D:\DUT 2\HK2\.NET Workspace\QuanLyBaiBaoKhoaHoc\obj\Debug\net9.0\QuanLyBaiBaoKhoaHoc.sourcelink.json
