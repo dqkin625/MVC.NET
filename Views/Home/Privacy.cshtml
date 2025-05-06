@@ -1,6 +1,40 @@
 ﻿@{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Chính sách bảo mật";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<style>
+    .privacy-container {
+        max-width: 800px;
+        margin: 60px auto;
+        padding: 40px;
+        background-color: #fff;
+        border-radius: 16px;
+        color: #111;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .privacy-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .privacy-content {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #444;
+    }
+</style>
+
+<div class="privacy-container">
+    <div class="privacy-title">@ViewData["Title"]</div>
+
+    <div class="privacy-content">
+        <p>Trang này mô tả chính sách bảo mật của hệ thống quản lý bài báo khoa học. Mọi thông tin cá nhân được thu thập từ người dùng sẽ được bảo mật và chỉ sử dụng cho mục đích quản lý bài viết và tài khoản.</p>
+
+        <p>Chúng tôi cam kết không chia sẻ thông tin của bạn với bên thứ ba khi chưa có sự đồng ý.</p>
+
+        <p>Nếu bạn có bất kỳ câu hỏi hoặc yêu cầu nào liên quan đến bảo mật, vui lòng liên hệ với quản trị viên hệ thống.</p>
+    </div>
+</div>

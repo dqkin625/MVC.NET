@@ -2,38 +2,104 @@
     ViewData["Title"] = "Đăng nhập";
 }
 
-<div class="row">
-    <div class="col-md-4 offset-md-4">
-        <h2 class="text-center">Đăng nhập</h2>
+<style>
+    .login-container {
+        max-width: 400px;
+        margin: 60px auto;
+        background: #fff;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 0 0 1px #ddd;
+    }
 
-        <!-- Hiển thị thông báo flash -->
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success text-center">@TempData["Success"]</div>
+    .login-title {
+        font-size: 28px;
+        font-weight: 600;
+        text-align: center;
+        margin-bottom: 30px;
+        color: #000;
+    }
+
+    .form-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #000;
+        margin-bottom: 6px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        padding: 12px;
+        font-size: 15px;
+        background: #f9f9f9;
+        color: #000;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #000;
+            background: #fff;
         }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger text-center">@TempData["Error"]</div>
+
+    .btn-submit {
+        background: #000;
+        color: #fff;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 12px;
+        border: none;
+        width: 100%;
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+
+        .register-link a {
+            color: #000;
+            text-decoration: underline;
         }
 
-        <form asp-action="Login" method="post">
-            <div class="form-group">
-                <label for="username">Tên tài khoản</label>
-                <input type="text" name="username" class="form-control" placeholder="Nhập tài khoản" required />
-            </div>
+    .alert {
+        border-radius: 10px;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+</style>
 
-            <div class="form-group">
-                <label for="password">Mật khẩu</label>
-                <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu" required />
-            </div>
+<div class="login-container">
+    <div class="login-title">Đăng nhập</div>
 
-            <div class="form-group mt-3">
-                <input type="submit" value="Đăng nhập" class="btn btn-primary w-100" />
-            </div>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success text-center">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger text-center">@TempData["Error"]</div>
+    }
 
-            <div class="text-center mt-2">
-                <a asp-action="Register">Chưa có tài khoản? Đăng ký</a>
-            </div>
-        </form>
-    </div>
+    <form asp-action="Login" method="post"> 
+        @* gửi form về action Login bằng phương thức POST *@
+        <div class="mb-3">
+            <label class="form-label">Tên tài khoản</label>
+            <input type="text" name="username" class="form-control" placeholder="Nhập tài khoản" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Mật khẩu</label>
+            <input type="password" name="password" class="form-control" placeholder="Nhập mật khẩu" required />
+        </div>
+
+        <div class="d-grid">
+            <input type="submit" value="Đăng nhập" class="btn-submit" />
+        </div>
+
+        <div class="register-link">
+            <a asp-action="Register">Chưa có tài khoản? Đăng ký</a>
+        </div>
+    </form>
 </div>

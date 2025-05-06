@@ -1,36 +1,76 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Quản lý bài báo khoa học</title>
-    <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/QuanLyBaiBaoKhoaHoc.styles.css" asp-append-version="true" />
+
+    <style>
+        body {
+            background-color: #f7f7f7;
+            font-family: 'Segoe UI', sans-serif;
+            color: #111;
+        }
+
+        .navbar {
+            background-color: #fff !important;
+            border-bottom: 1px solid #eee;
+        }
+
+        .navbar-brand, .nav-link {
+            font-weight: 500;
+            color: #111 !important;
+        }
+
+        .navbar .nav-link.active {
+            border-bottom: 2px solid #000;
+        }
+
+        footer {
+            background: #fff;
+            border-top: 1px solid #eee;
+            padding: 16px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+            a:hover {
+                color: #0056b3;
+            }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light shadow-sm mb-4">
             <div class="container">
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">Quản lý bài báo khoa học</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                            <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
                         @if (Context.Session.GetString("UserId") != null)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Article" asp-action="Index">Bài viết</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Article" ? "active" : "")" asp-controller="Article" asp-action="Index">Bài viết</a>
                             </li>
                             @if (Context.Session.GetString("Role") == "Admin")
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Statistics" asp-action="Index">Thống kê</a>
+                                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Statistics" ? "active" : "")" asp-controller="Statistics" asp-action="Index">Thống kê</a>
                                 </li>
                             }
                         }
@@ -39,19 +79,31 @@
                         @if (Context.Session.GetString("UserId") == null)
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Login">Đăng nhập</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Đăng ký</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Register">Đăng ký</a>
                             </li>
                         }
                         else
                         {
                             <li class="nav-item">
-                                <span class="nav-link text-dark">Xin chào, @Context.Session.GetString("Username")</span>
+                                @* <span class="nav-link">Xin chào, @Context.Session.GetString("Username")</span> *@
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                    Xin chào, @Context.Session.GetString("Username")
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Thông tin tài khoản</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="ChangePassword">Đổi mật khẩu</a></li>
+                                    @* <li><hr class="dropdown-divider" /></li> *@
+                                    @* <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout">Đăng xuất</a></li> *@
+                                </ul>
+                            </li>
+
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
+                                <a class="nav-link" asp-controller="Account" asp-action="Logout">Đăng xuất</a>
                             </li>
                         }
                     </ul>
@@ -59,17 +111,17 @@
             </div>
         </nav>
     </header>
+
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main" class="pb-4">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - Quản lý bài báo khoa học
-        </div>
+    <footer>
+        &copy; 2025 - Quản lý bài báo khoa học
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

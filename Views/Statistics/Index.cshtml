@@ -1,15 +1,128 @@
+@using Azure.Core
 @model QuanLyBaiBaoKhoaHoc.Models.StatisticsViewModel
-
 @{
     ViewData["Title"] = "Thống kê bài viết";
 }
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">Thống kê bài viết</h2>
+<style>
+    body {
+        background-color: #f5f5f5;
+        color: #111;
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-    <ul class="nav nav-tabs mb-3" id="statsTabs" role="tablist">
+    .stat-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        margin-bottom: 20px;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #444;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        letter-spacing: 1px;
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        color: #111;
+    }
+
+    .tag {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: bold;
+        display: inline-block;
+        min-width: 80px;
+        text-align: center;
+    }
+
+    .tag-green {
+        background-color: #e6f4ea;
+        color: #1e4620;
+    }
+
+    .tag-yellow {
+        background-color: #fef7e0;
+        color: #5c4b00;
+    }
+
+    .tag-red {
+        background-color: #fbeaea;
+        color: #821b1b;
+    }
+
+    .author-card {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .author-name {
+        font-weight: 500;
+    }
+
+    .author-values span {
+        display: inline-block;
+        width: 80px;
+        text-align: right;
+    }
+
+    .highlight {
+        font-weight: bold;
+        font-size: 18px;
+        color: #000;
+    }
+
+    .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+
+    .text-success {
+        color: #198754;
+    }
+
+    .text-warning {
+        color: #ffc107;
+    }
+
+    .text-danger {
+        color: #dc3545;
+    }
+</style>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-5">Thống kê bài viết</h2>
+
+    <form method="get" asp-action="Index" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label for="fromDate" class="form-label">Từ ngày</label>
+            <input type="date" name="fromDate" class="form-control" value="@Context.Request.Query["fromDate"]" />
+        </div>
+        <div class="col-md-4">
+            <label for="toDate" class="form-label">Đến ngày</label>
+            <input type="date" name="toDate" class="form-control" value="@Context.Request.Query["toDate"]" />
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-dark w-100">Lọc thống kê</button>
+        </div>
+    </form>
+
+    <ul class="nav nav-tabs mb-4" id="statTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="author-tab" data-bs-toggle="tab" data-bs-target="#author" type="button" role="tab">Theo tác giả</button>
+            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">Tổng quan</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="author-tab" data-bs-toggle="tab" data-bs-target="#author" type="button" role="tab">Theo tác giả</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="topic-tab" data-bs-toggle="tab" data-bs-target="#topic" type="button" role="tab">Theo chủ đề</button>
@@ -19,73 +132,109 @@
         </li>
     </ul>
 
-    <div class="tab-content" id="statsTabsContent">
-        <!-- Tác giả -->
-        <div class="tab-pane fade show active" id="author" role="tabpanel">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Tác giả</th>
-                            <th class="text-end">Số lượng</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.ArticlesByAuthor)
-                        {
-                            <tr>
-                                <td>@item.AuthorName</td>
-                                <td class="text-end">@item.Count</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    <div class="tab-content" id="statTabsContent">
+        <div class="tab-pane fade show active" id="overview" role="tabpanel">
+            <div class="grid-4">
+                <div class="stat-card">
+                    <div class="stat-label">Tổng bài viết</div>
+                    <div class="stat-value">@Model.TotalArticles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Đang chờ duyệt</div>
+                    <div class="stat-value text-warning">@Model.PendingCount</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Đã duyệt</div>
+                    <div class="stat-value text-success">@Model.ApprovedCount</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Đã từ chối</div>
+                    <div class="stat-value text-danger">@Model.RejectedCount</div>
+                </div>
+            </div>
+
+            @if (Model.TopTopic != null)
+            {
+                <div class="stat-card mt-4">
+                    <div class="stat-label">Chủ đề hot nhất</div>
+                    <div class="highlight">@Model.TopTopic.TopicName — @Model.TopTopic.Count bài</div>
+                </div>
+            }
+
+            @if (Model.TopAuthorByApproved != null)
+            {
+                <div class="stat-card mt-3">
+                    <div class="stat-label">Tác giả có nhiều bài viết được duyệt nhất</div>
+                    <div class="highlight">@Model.TopAuthorByApproved.AuthorName — @Model.TopAuthorByApproved.Count bài</div>
+                </div>
+            }
+            <div class="stat-card mt-5">
+                <div class="stat-label">10 Tác giả có nhiều bài được duyệt nhất</div>
+                @foreach (var item in Model.TopAuthorsByApprovedCount ?? new())
+                {
+                    <div class="author-card">
+                        <div class="author-name">@item.AuthorName</div>
+                        <div class="author-values">
+                            <span class="text-success">@item.Count</span>
+                        </div>
+                    </div>
+                }
+            </div>
+
+
+            <div class="stat-card mt-5">
+                <div class="stat-label">10 Tác giả có nhiều bài nhất</div>
+                @foreach (var item in Model.TopAuthorsByFullStats ?? new())
+                {
+                    <div class="author-card">
+                        <div class="author-name">@item.AuthorName</div>
+                        <div class="author-values">
+                            <span>@item.Total</span>
+                            <span class="tag tag-green">@item.Approved</span>
+                            <span class="tag tag-red">@item.Rejected</span>
+                            <span class="tag tag-yellow">@item.Pending</span>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
 
-        <!-- Chủ đề -->
+        <div class="tab-pane fade" id="author" role="tabpanel">
+            <div class="stat-card">
+                <h5 class="stat-label">Số bài viết theo tác giả</h5>
+                @foreach (var item in Model.ArticlesByAuthor ?? new())
+                {
+                    <div class="author-card">
+                        <div class="author-name">@item.AuthorName</div>
+                        <div>@item.Count bài</div>
+                    </div>
+                }
+            </div>
+        </div>
+
         <div class="tab-pane fade" id="topic" role="tabpanel">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Chủ đề</th>
-                            <th class="text-end">Số lượng</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.ArticlesByTopic)
-                        {
-                            <tr>
-                                <td>@item.TopicName</td>
-                                <td class="text-end">@item.Count</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+            <div class="stat-card">
+                <h5 class="stat-label">Số bài viết theo chủ đề</h5>
+                @foreach (var item in Model.ArticlesByTopic ?? new())
+                {
+                    <div class="author-card">
+                        <div class="author-name">@item.TopicName</div>
+                        <div>@item.Count bài</div>
+                    </div>
+                }
             </div>
         </div>
 
-        <!-- Trạng thái -->
         <div class="tab-pane fade" id="status" role="tabpanel">
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Trạng thái</th>
-                            <th class="text-end">Số lượng</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model.ArticlesByStatus)
-                        {
-                            <tr>
-                                <td>@item.Status</td>
-                                <td class="text-end">@item.Count</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+            <div class="stat-card">
+                <h5 class="stat-label">Số bài viết theo trạng thái</h5>
+                @foreach (var item in Model.ArticlesByStatus ?? new())
+                {
+                    <div class="author-card">
+                        <div class="author-name">@item.Status</div>
+                        <div>@item.Count bài</div>
+                    </div>
+                }
             </div>
         </div>
     </div>

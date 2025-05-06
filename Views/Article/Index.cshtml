@@ -6,91 +6,162 @@
     var currentStatus = ViewBag.CurrentStatus as string;
 }
 
-<h2>Danh sách bài viết</h2>
+<style>
+    .page-title {
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 24px;
+        color: #111;
+        text-align: center;
+    }
 
-<!-- Tabs lọc bài viết: CẢ ADMIN VÀ AUTHOR đều thấy -->
-<div class="mb-3">
-    <ul class="nav nav-tabs">
+    .nav-tabs .nav-link {
+        color: #333;
+        font-weight: 500;
+        border: none;
+        border-bottom: 2px solid transparent;
+    }
+
+        .nav-tabs .nav-link.active {
+            border-color: #111;
+            color: #111;
+            background: none;
+        }
+
+    .btn {
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    table {
+        background: #fff;
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 16px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+    }
+
+    th {
+        color: #666;
+        text-transform: uppercase;
+        font-size: 12px;
+        letter-spacing: 1px;
+    }
+
+    tr:hover {
+        background-color: #fafafa;
+    }
+
+    .modal-title {
+        font-weight: bold;
+        color: #111;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="page-title">Danh sách bài viết</div>
+
+    <form method="get" asp-action="Index" class="mb-4">
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label for="fromDate" class="form-label">Từ ngày</label>
+                <input type="date" name="fromDate" class="form-control" value="@Context.Request.Query["fromDate"]" />
+            </div>
+            <div class="col-md-4">
+                <label for="toDate" class="form-label">Đến ngày</label>
+                <input type="date" name="toDate" class="form-control" value="@Context.Request.Query["toDate"]" />
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-dark w-100">Lọc bài viết</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Tabs lọc bài viết -->
+    <ul class="nav nav-tabs mb-3">
         <li class="nav-item">
             <a class="nav-link @(string.IsNullOrEmpty(currentStatus) ? "active" : "")" asp-action="Index">Tất cả</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @(currentStatus == "Pending" ? "active" : "")"
-               asp-action="IndexByStatus" asp-route-status="Pending">Chờ duyệt</a>
+            <a class="nav-link @(currentStatus == "Pending" ? "active" : "")" asp-action="IndexByStatus" asp-route-status="Pending">Chờ duyệt</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @(currentStatus == "Approved" ? "active" : "")"
-               asp-action="IndexByStatus" asp-route-status="Approved">Đã duyệt</a>
+            <a class="nav-link @(currentStatus == "Approved" ? "active" : "")" asp-action="IndexByStatus" asp-route-status="Approved">Đã duyệt</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link @(currentStatus == "Rejected" ? "active" : "")"
-               asp-action="IndexByStatus" asp-route-status="Rejected">Từ chối</a>
+            <a class="nav-link @(currentStatus == "Rejected" ? "active" : "")" asp-action="IndexByStatus" asp-route-status="Rejected">Từ chối</a>
         </li>
     </ul>
+
+    <!-- Nút thêm -->
+    @if (role == "Author")
+    {
+        <a asp-action="Create" class="btn btn-dark mb-3">Thêm bài viết mới</a>
+    }
+
+    <!-- Danh sách -->
+    <table>
+        <thead>
+            <tr>
+                <th>Tiêu đề</th>
+                <th>Tác giả</th>
+                <th>Ngày gửi</th>
+                <th>Chủ đề</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <a href="javascript:void(0);" onclick="showDetails(@item.ArticleId)">
+                            @item.Title
+                        </a>
+                    </td>
+                    <td>@item.Author.FullName</td>
+                    <td>@item.SubmittedDate.ToShortDateString()</td>
+                    <td>@string.Join(", ", item.ArticleTopics.Select(at => at.Topic.Name))</td>
+                    <td>@item.Status</td>
+                    <td>
+                        <div class="d-flex flex-wrap gap-1">
+                            @if ((role == "Author" || role == "Admin") && item.Status == ArticleStatus.Pending)
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.ArticleId" class="btn btn-outline-dark btn-sm">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@item.ArticleId" class="btn btn-outline-danger btn-sm">Xoá</a>
+                            }
+
+                            @if (role == "Admin" && item.Status == ArticleStatus.Pending)
+                            {
+                                <a asp-action="Approve" asp-route-id="@item.ArticleId" class="btn btn-outline-success btn-sm">Duyệt</a>
+                                <a asp-action="Reject" asp-route-id="@item.ArticleId" class="btn btn-outline-warning btn-sm">Từ chối</a>
+                            }
+                        </div>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+
 </div>
 
-<!-- Nút thêm bài viết chỉ dành cho Author -->
-@if (role == "Author")
-{
-    <p>
-        <a asp-action="Create" class="btn btn-primary">Thêm bài viết mới</a>
-    </p>
-}
-
-<table class="table">
-    <thead>
-        <tr>
-            <th>Tiêu đề</th>
-            <th>Tác giả</th>
-            <th>Ngày gửi</th>
-            <th>Chủ đề</th>
-            <th>Trạng thái</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    <a href="javascript:void(0);" onclick="showDetails(@item.ArticleId)">
-                        @item.Title
-                    </a>
-                </td>
-                <td>@item.Author.FullName</td>
-                <td>@item.SubmittedDate.ToShortDateString()</td>
-                <td>@string.Join(", ", item.ArticleTopics.Select(at => at.Topic.Name))</td>
-                <td>@item.Status</td>
-                <td>
-                    @* Author: chỉ được sửa hoặc xóa khi bài đang chờ duyệt *@
-                    @if (role == "Author" && item.Status == ArticleStatus.Pending)
-                    {
-                        <a asp-action="Edit" asp-route-id="@item.ArticleId" class="btn btn-sm btn-info">Sửa</a>
-                        <a asp-action="Delete" asp-route-id="@item.ArticleId" class="btn btn-sm btn-danger">Xóa</a>
-                    }
-
-                    @* Admin: chỉ được duyệt hoặc từ chối khi bài đang chờ duyệt *@
-                    @if (role == "Admin" && item.Status == ArticleStatus.Pending)
-                    {
-                        <a asp-action="Approve" asp-route-id="@item.ArticleId" class="btn btn-sm btn-success">Duyệt</a>
-                        <a asp-action="Reject" asp-route-id="@item.ArticleId" class="btn btn-sm btn-warning">Từ chối</a>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-<!-- Modal hiển thị chi tiết bài viết -->
+<!-- Modal -->
 <div class="modal fade" id="articleModal" tabindex="-1" aria-labelledby="articleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+        <div class="modal-content rounded-3">
             <div class="modal-header">
                 <h5 class="modal-title" id="articleModalLabel">Chi tiết bài viết</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body" id="articleModalBody">
-                <!-- Nội dung sẽ được load bằng AJAX -->
+                <!-- AJAX -->
             </div>
         </div>
     </div>

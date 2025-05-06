@@ -2,6 +2,7 @@
 using QuanLyBaiBaoKhoaHoc.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Data;
 
 namespace QuanLyBaiBaoKhoaHoc.Controllers
 {
@@ -15,26 +16,42 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
         }
         //Truy cập CSDL thông qua DI (Dependency Injection) để lấy dữ liệu từ DB
 
-        public IActionResult Index() //hiển thị danh sách bài viết
+        public IActionResult Index(DateTime? fromDate, DateTime? toDate) // Thêm tham số từ ngày và đến ngày
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null)
-                return RedirectToAction("Login", "Account"); //kiểm tra ngay nếu người dùng chưa đăng nhập thì chuyển đến trang đăng nhập
-            var role = HttpContext.Session.GetString("Role"); //Lấy từ Session role và id
+                return RedirectToAction("Login", "Account"); // Kiểm tra ngay nếu người dùng chưa đăng nhập thì chuyển đến trang đăng nhập
 
-            var articles = _context.Articles //LinQ Expression 1 tập các bài viết
+            var role = HttpContext.Session.GetString("Role"); // Lấy từ Session role và id
+
+            var articles = _context.Articles // LinQ Expression lấy các bài viết
                 .Include(a => a.Author)
                 .Include(a => a.ArticleTopics)
-                    .ThenInclude(at => at.Topic);
-            // với mỗi bài viết a nạp thêm thuộc tính a.Author(tác giả bài viết đó) (a là biến ẩn danh đại diện cho đối tượng Article trong quá trình LINQ xử lý)
+                    .ThenInclude(at => at.Topic)
+                .OrderByDescending(a => a.SubmittedDate);
 
+            // Lọc bài viết theo ngày nếu có từ ngày và đến ngày
+            if (fromDate.HasValue)
+            {
+                articles = (IOrderedQueryable<Article>)articles.Where(a => a.SubmittedDate >= fromDate.Value.Date); // Lọc theo từ ngày
+            }
+
+            if (toDate.HasValue)
+            {
+                articles = (IOrderedQueryable<Article>)articles.Where(a => a.SubmittedDate <= toDate.Value.Date); // Lọc theo đến ngày
+            }
+
+            // Chuyển đổi về List để tránh lỗi
+            var articlesList = articles.ToList();
+
+            // Quản lý quyền truy cập: Admin xem toàn bộ bài viết, Người dùng chỉ xem bài của mình
             if (role == "Admin")
             {
-                return View(articles.ToList()); //admin xem toàn bộ bài viết
+                return View(articlesList); // Admin xem toàn bộ bài viết
             }
             else
             {
-                return View(articles.Where(a => a.AuthorId == userId).ToList()); //chỉ hiển thị bài viết của chính mình
+                return View(articlesList.Where(a => a.AuthorId == userId).ToList()); // Chỉ hiển thị bài viết của chính mình
             }
         }
 
@@ -43,9 +60,12 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
             var userId = HttpContext.Session.GetInt32("UserId");
             var role = HttpContext.Session.GetString("Role");
 
-            // Chưa đăng nhập → chuyển về Login
+            // Chưa đăng nhập thì chuyển về Login
             if (userId == null)
                 return RedirectToAction("Login", "Account");
+
+            if (role != "Author")
+                return RedirectToAction("AccessDenied", "Account");
 
             var model = new ArticleCreateViewModel
             {
@@ -66,6 +86,10 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null)
                 return RedirectToAction("Login", "Account");
+
+            var role = HttpContext.Session.GetString("Role");
+            if (role != "Author")
+                return RedirectToAction("AccessDenied", "Account");
 
             if (ModelState.IsValid) //kiểm tra các trường có được điền đầy đủ không
             {
@@ -104,9 +128,11 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
             var userId = HttpContext.Session.GetInt32("UserId");
             var role = HttpContext.Session.GetString("Role");
 
-            // Chưa đăng nhập → chuyển về Login
             if (userId == null)
                 return RedirectToAction("Login", "Account");
+
+            if (role != "Author")
+                return RedirectToAction("AccessDenied", "Account");
 
             var article = _context.Articles
                 .Include(a => a.ArticleTopics)
@@ -114,7 +140,7 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
 
             if (article == null) return NotFound();
 
-            // Nếu không phải admin và không phải tác giả của bài viết → chặn truy cập
+            // Nếu không phải admin và không phải tác giả của bài viết chặn truy cập
             if (role != "Admin" && article.AuthorId != userId)
                 return RedirectToAction("AccessDenied", "Account");
 
@@ -138,8 +164,13 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
         public IActionResult Edit(ArticleEditViewModel model)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
+            var role = HttpContext.Session.GetString("Role");
+
             if (userId == null)
                 return RedirectToAction("Login", "Account");
+
+            if (role != "Author")
+                return RedirectToAction("AccessDenied", "Account");
 
             if (!ModelState.IsValid)
             {
@@ -152,10 +183,15 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
             }
 
             var article = _context.Articles
-                .Include(a => a.ArticleTopics) // nạp các chủ đề liên quan đến bài viết
-                .FirstOrDefault(a => a.ArticleId == model.Article.ArticleId); //tìm đúng bài viết cần sửa
+                .Include(a => a.ArticleTopics)
+                .FirstOrDefault(a => a.ArticleId == model.Article.ArticleId);
 
-            if (article == null) return NotFound();
+            if (article == null)
+                return NotFound();
+
+            //Kiểm tra phân quyền: chỉ Admin hoặc tác giả mới được sửa
+            if (role != "Admin" && article.AuthorId != userId)
+                return RedirectToAction("AccessDenied", "Account");
 
             // Cập nhật lại thông tin cơ bản
             article.Title = model.Article.Title;
@@ -174,20 +210,31 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
             return RedirectToAction("Index");
         }
 
-
         public IActionResult Delete(int id)
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var role = HttpContext.Session.GetString("Role");
+
+            // Chưa đăng nhập → chuyển về Login
+            if (userId == null)
+                return RedirectToAction("Login", "Account");
+
             var article = _context.Articles
-                .Include(a => a.ArticleTopics) //phải include để xóa luôn các liên kết trong bảng ArticleTopic (tránh lỗi quan hệ ngoại)
+                .Include(a => a.ArticleTopics)
                 .FirstOrDefault(a => a.ArticleId == id);
 
             if (article == null)
                 return NotFound();
 
+            // ❗ Phân quyền: chỉ Admin hoặc tác giả mới được xóa
+            if (role != "Admin" && article.AuthorId != userId)
+                return RedirectToAction("AccessDenied", "Account");
+
             _context.Articles.Remove(article);
             _context.SaveChanges();
             return RedirectToAction("Index");
         }
+
 
         public IActionResult Approve(int id)
         {
@@ -223,6 +270,12 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
 
         public IActionResult Details(int id)
         {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            var role = HttpContext.Session.GetString("Role");
+
+            if (userId == null)
+                return RedirectToAction("Login", "Account");
+
             var article = _context.Articles
                 .Include(a => a.Author)
                 .Include(a => a.ArticleTopics)
@@ -232,8 +285,13 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
             if (article == null)
                 return NotFound();
 
+            // Nếu không phải Admin và không phải tác giả → chặn truy cập
+            if (role != "Admin" && article.AuthorId != userId)
+                return RedirectToAction("AccessDenied", "Account");
+
             return PartialView("ArticleDetailsPartial", article);
         }
+
         public IActionResult IndexByStatus(ArticleStatus status)
         {
             var role = HttpContext.Session.GetString("Role");
@@ -247,14 +305,18 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
                 .Include(a => a.ArticleTopics).ThenInclude(at => at.Topic)
                 .Where(a => a.Status == status);
 
-            // ✅ Nếu là Author thì chỉ xem bài của chính mình
+            // Nếu là Author thì chỉ xem bài của chính mình
             if (role != "Admin")
             {
                 query = query.Where(a => a.AuthorId == userId);
             }
 
             ViewBag.CurrentStatus = status.ToString();
-            return View("Index", query.ToList());
+
+            // Sắp xếp theo ngày gửi mới nhất
+            return View("Index", query
+                .OrderByDescending(a => a.SubmittedDate)
+                .ToList());
         }
     }
 }

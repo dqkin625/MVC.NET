@@ -4,53 +4,121 @@
     ViewData["Title"] = "Thêm bài viết mới";
 }
 
-<h2 class="text-center mb-4">Thêm bài viết mới</h2>
+<style>
+    .form-container {
+        background: #fff;
+        padding: 32px;
+        border-radius: 12px;
+        max-width: 700px;
+        margin: 0 auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
 
-<form asp-action="Create">
-    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+    .form-title {
+        text-align: center;
+        font-size: 28px;
+        margin-bottom: 24px;
+        color: #111;
+    }
 
-    <div class="form-group mb-3">
-        <label asp-for="Article.Title" class="form-label"></label>
-        <input asp-for="Article.Title" class="form-control" />
-        <span asp-validation-for="Article.Title" class="text-danger"></span>
-    </div>
+    label {
+        font-weight: 500;
+        color: #222;
+        margin-bottom: 4px;
+        display: block;
+    }
 
-    <div class="form-group mb-3">
-        <label asp-for="Article.Summary" class="form-label"></label>
-        <textarea asp-for="Article.Summary" class="form-control" rows="3"></textarea>
-        <span asp-validation-for="Article.Summary" class="text-danger"></span>
-    </div>
+    input[type="text"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        background: #f9f9f9;
+        color: #111;
+        margin-bottom: 10px;
+    }
 
-    <div class="form-group mb-3">
-        <label asp-for="Article.Content" class="form-label"></label>
-        <textarea asp-for="Article.Content" class="form-control" rows="10"></textarea>
-        <span asp-validation-for="Article.Content" class="text-danger"></span>
-    </div>
+    textarea {
+        resize: vertical;
+    }
 
-    <div class="form-group mb-3">
-        <label class="form-label">Chủ đề</label>
-        @for (int i = 0; i < Model.Topics.Count(); i++)
-        {
-            <div class="form-check">
-                <input type="checkbox"
-                       class="form-check-input"
-                       name="SelectedTopicIds"
-                       value="@Model.Topics[i].Value"
-                       id="topic_@i" />
-                <label class="form-check-label" for="topic_@i">
-                    @Model.Topics[i].Text
-                </label>
-            </div>
-        }
-        <span asp-validation-for="SelectedTopicIds" class="text-danger"></span>
-    </div>
+    .form-check {
+        margin-bottom: 8px;
+    }
 
+    .btn-block {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: none;
+    }
 
-    <div class="form-group mt-4">
-        <button type="submit" class="btn btn-primary w-100">Thêm</button>
-        <a asp-action="Index" class="btn btn-secondary w-100 mt-2">Quay lại</a>
-    </div>
-</form>
+    .btn-primary {
+        background-color: #111;
+        color: white;
+    }
+
+    .btn-secondary {
+        background-color: #eee;
+        color: #111;
+        margin-top: 10px;
+    }
+
+    .text-danger {
+        font-size: 14px;
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-title">Thêm bài viết mới</div>
+
+    <form asp-action="Create">
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="Article.Title"></label>
+            <input asp-for="Article.Title" />
+            <span asp-validation-for="Article.Title" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Article.Summary"></label>
+            <textarea asp-for="Article.Summary" rows="3"></textarea>
+            <span asp-validation-for="Article.Summary" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Article.Content"></label>
+            <textarea asp-for="Article.Content" rows="8"></textarea>
+            <span asp-validation-for="Article.Content" class="text-danger"></span>
+        </div>
+
+        <div class="mb-4">
+            <label>Chủ đề</label>
+            @for (int i = 0; i < Model.Topics.Count(); i++)
+            {
+                <div class="form-check">
+                    <input type="checkbox"
+                           class="form-check-input"
+                           name="SelectedTopicIds"
+                           value="@Model.Topics[i].Value"
+                           id="topic_@i" />
+                    <label class="form-check-label" for="topic_@i">
+                        @Model.Topics[i].Text
+                    </label>
+                </div>
+            }
+            <span asp-validation-for="SelectedTopicIds" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Thêm</button>
+        <a asp-action="Index" class="btn btn-secondary btn-block">Quay lại</a>
+    </form>
+</div>
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")

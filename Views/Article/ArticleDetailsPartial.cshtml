@@ -1,11 +1,78 @@
 ﻿@model QuanLyBaiBaoKhoaHoc.Models.Article
 
-<div>
-    <h4>@Model.Title</h4>
-    <p><strong>Tác giả:</strong> @Model.Author?.FullName</p>
-    <p><strong>Ngày gửi:</strong> @Model.SubmittedDate.ToShortDateString()</p>
-    <p><strong>Chủ đề:</strong> @string.Join(", ", Model.ArticleTopics.Select(at => at.Topic.Name))</p>
-    <p><strong>Tóm tắt:</strong> @Model.Summary</p>
-    <p><strong>Nội dung:</strong> @Model.Content</p>
-    <p><strong>Trạng thái:</strong> @Model.Status</p>
+<style>
+    .details-box {
+        background: #fff;
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        font-family: 'Segoe UI', sans-serif;
+        color: #111;
+    }
+
+    .details-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+
+    .details-row {
+        margin-bottom: 12px;
+    }
+
+    .details-label {
+        font-weight: 500;
+        color: #555;
+        min-width: 120px;
+        display: inline-block;
+    }
+
+    .details-value {
+        font-weight: 400;
+    }
+
+    .details-summary {
+        margin-top: 16px;
+        font-style: italic;
+        color: #444;
+    }
+
+    .details-content {
+        margin-top: 16px;
+        line-height: 1.6;
+    }
+</style>
+
+<div class="details-box">
+    <div class="details-title">@Model.Title</div>
+
+    <div class="details-row">
+        <span class="details-label">Tác giả:</span>
+        <span class="details-value">@Model.Author?.FullName</span>
+    </div>
+
+    <div class="details-row">
+        <span class="details-label">Ngày gửi:</span>
+        <span class="details-value">@Model.SubmittedDate.ToShortDateString()</span>
+    </div>
+
+    <div class="details-row">
+        <span class="details-label">Chủ đề:</span>
+        <span class="details-value">@string.Join(", ", Model.ArticleTopics.Select(at => at.Topic.Name))</span>
+    </div>
+
+    <div class="details-row">
+        <span class="details-label">Trạng thái:</span>
+        <span class="details-value">@Model.Status</span>
+    </div>
+
+    <div class="details-summary">
+        <strong>Tóm tắt:</strong><br />
+        @Model.Summary
+    </div>
+
+    <div class="details-content">
+        <strong>Nội dung:</strong><br />
+        @Model.Content
+    </div>
 </div>

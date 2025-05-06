@@ -16,23 +16,24 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
             _context = context;
         }
         // Truy cập CSDL thông qua DI (Dependency Injection) để lấy dữ liệu từ DB
-        // Hiển thị trang đăng nhập
-        public IActionResult Login() //Không cần truyền model vì form đăng nhập chỉ có 2 trường là tài khoản và mật khẩu
+        public IActionResult Login()
         {
+            if (HttpContext.Session.GetInt32("UserId") != null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
-        // Xử lý đăng nhập
-        [HttpPost] //phương thức này sẽ được gọi khi người dùng nhấn nút đăng nhập trên form
-        public IActionResult Login(string username, string password) //nhận tên đăng nhập và mật khẩu điền vào form
+        [HttpPost]
+        public IActionResult Login(string username, string password)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.PasswordHash == password); 
+            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.PasswordHash == password);
             //Tìm người dùng trong DbSet Users có tên đăng nhập và mật khẩu khớp với dữ liệu nhập vào form
             //u là mỗi dòng trong bảng User, dùng LINQ để thay thế cho for each (var u in Users)...
 
             if (user != null)
             {
-                // Lưu thông tin vào session để ở các controller khác kiểm tra Session[Role] để phân quyền
                 //Session là vùng nhớ tạm thời trên server, lưu trữ thông tin người dùng trong suốt phiên làm việc và lấy ra ở các Controller khác
                 HttpContext.Session.SetInt32("UserId", user.UserId);
                 HttpContext.Session.SetString("Username", user.Username);
@@ -46,17 +47,19 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
             return View();
         }
 
-        // Hiển thị trang đăng ký
         public IActionResult Register()
         {
+            if (HttpContext.Session.GetInt32("UserId") != null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
 
-        // Xử lý đăng ký
-        [HttpPost] //phương thức này sẽ được gọi khi người dùng nhấn nút đăng ký trên form
+        [HttpPost] 
         public IActionResult Register(User user) //Dữ liệu từ form sẽ được tự động bind vào model User
         {
-            if (!ModelState.IsValid) //kiểm tra hợp lệ
+            if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Dữ liệu nhập chưa hợp lệ.";
                 return View(user);
@@ -89,6 +92,50 @@ namespace QuanLyBaiBaoKhoaHoc.Controllers
             HttpContext.Session.Clear(); //xóa toàn bộ thông tin trong session (đăng xuất)
             TempData["Success"] = "Đăng xuất thành công.";
             return RedirectToAction("Login"); //chuyển hướng về trang đăng nhập
+        }
+
+        public IActionResult Profile()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login");
+
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
+            if (user == null) return NotFound();
+
+            return View(user);
+        }
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login");
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ChangePassword(string currentPassword, string newPassword)
+        {
+            var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null) return RedirectToAction("Login");
+
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
+            if (user == null || user.PasswordHash != currentPassword)
+            {
+                TempData["Error"] = "Mật khẩu hiện tại không đúng.";
+                return View();
+            }
+
+            user.PasswordHash = newPassword;
+            _context.SaveChanges();
+
+            TempData["Success"] = "Đổi mật khẩu thành công.";
+            return RedirectToAction("Profile");
+        }
+
+
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
 
     }

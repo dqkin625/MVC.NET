@@ -2,20 +2,54 @@
     ViewData["Title"] = "Trang chủ";
 }
 
+<style>
+    .home-title {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #111;
+        margin-top: 40px;
+    }
+
+    .home-buttons {
+        margin-top: 40px;
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    .minimal-btn {
+        background-color: #111;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+        .minimal-btn:hover {
+            background-color: #000;
+            color: white;
+            text-decoration: none;
+        }
+</style>
+
 <div class="text-center">
-    <h1 class="display-4">Chào mừng đến với hệ thống quản lý bài báo khoa học</h1>
-    
+    <h1 class="home-title">Chào mừng đến với hệ thống quản lý bài báo khoa học</h1>
+
     @if (Context.Session.GetString("Role") == "Admin")
     {
-        <div class="mt-4">
-            <a asp-controller="Article" asp-action="Index" class="btn btn-primary">Quản lý bài viết</a>
-            <a asp-controller="Statistics" asp-action="Index" class="btn btn-success">Xem thống kê</a>
+        <div class="home-buttons">
+            <a asp-controller="Article" asp-action="Index" class="minimal-btn">Quản lý bài viết</a>
+            <a asp-controller="Statistics" asp-action="Index" class="minimal-btn">Xem thống kê</a>
         </div>
     }
     else
     {
-        <div class="mt-4">
-            <a asp-controller="Article" asp-action="Index" class="btn btn-primary">Quản lý bài viết của tôi</a>
+        <div class="home-buttons">
+            <a asp-controller="Article" asp-action="Index" class="minimal-btn">Bài viết của tôi</a>
         </div>
     }
 </div>
